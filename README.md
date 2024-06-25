@@ -1,2 +1,2 @@
-# create CarrotMarket using nextJS & Type Script
-# carrot-market
+# create CarrotMarket using nextJS & TypeScript
+
