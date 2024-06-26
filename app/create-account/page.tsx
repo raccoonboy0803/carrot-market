@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { ChatBubbleOvalLeftEllipsisIcon } from '@heroicons/react/24/solid';
 import FormInput from '@/components/form-input';
+import FormButton from '@/components/form-button';
 
 export default function CreateAccount() {
   return (
@@ -11,7 +12,20 @@ export default function CreateAccount() {
       </div>
       <form className="flex flex-col gap-3">
         <FormInput type="text" placeholder="Username" required errors={[]} />
-        <button className="primary-btn h-10">Create account</button>
+        <FormInput type="email" placeholder="Email" required errors={[]} />
+        <FormInput
+          type="password"
+          placeholder="Password"
+          required
+          errors={[]}
+        />
+        <FormInput
+          type="password"
+          placeholder="Confirm Password "
+          required
+          errors={[]}
+        />
+        <FormButton loading={false} text="Create account" />
       </form>
       <div className="w-full h-[1px] bg-neutral-500" />
       <div>
