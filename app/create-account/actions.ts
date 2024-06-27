@@ -56,5 +56,5 @@ export async function createAccount(prevState: any, formData: FormData) {
 }
 
 // .parse() : 유효성검사 실패 시 throw error -> try catch와 함께 사용
-// .safeParse() : throw error ❌, 결과를 반환 -> 반환값을 변수에 저장하여 사용
+// .safeParse() : throw error ❌, 결과(객체)를 반환 -> 반환값을 변수에 저장하여 사용
 // .flatten() : error의 내용을 보기좋게 변형
