@@ -22,7 +22,13 @@ export default function CreateAccount() {
           required
           errors={state?.fieldErrors.username}
         />
-        <FormInput name="email" type="email" placeholder="Email" required />
+        <FormInput
+          name="email"
+          type="email"
+          placeholder="Email"
+          required
+          errors={state?.fieldErrors.email}
+        />
         <FormInput
           name="password"
           type="password"
