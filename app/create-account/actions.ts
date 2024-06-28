@@ -2,12 +2,7 @@
 
 import { z } from 'zod';
 
-const specialRegex = new RegExp(
-  /^[^!@#\$%\^&\*\(\)_\+\-\=\{\}\[\]\|\\:;'"<>\?,\.\/`~]*$/
-); // []대괄호 안에 있는 특수문자들은 허용하지않는다
-const passwordRegex = new RegExp(
-  /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).+$/
-); //알파벳 소문자,대문자 / 숫자 / 특수문자 최소 1개씩 포함
+import { PASSWORD_REGEX, SPECAIL_REGEX } from '@/lib/constants';
 
 const formSchema = z
   .object({
@@ -20,17 +15,17 @@ const formSchema = z
       .max(10, 'That is too long!')
       .toLowerCase()
       .trim()
-      .regex(specialRegex, 'No special characters allowed.'),
+      .regex(SPECAIL_REGEX, 'No special characters allowed.'),
     // regex() : 첫번째인자로 오는 정규표현식을 통과하지못하면, 두번째인자인 에러메시지를 출력
     email: z.string().email().toLowerCase(),
     password: z
       .string()
-      .min(10)
+      .min(4)
       .regex(
-        passwordRegex,
+        PASSWORD_REGEX,
         'A password must have lowercase, UPPERCASE, a number and special Characters'
       ),
-    confirmPassword: z.string().min(10),
+    confirmPassword: z.string().min(4),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: 'Both passwords sholud be the same.', // 에러 메시지

@@ -1,14 +1,11 @@
 'use server';
 
-import { redirect } from 'next/navigation';
-
-export const handleForm = async (prevState: any, data: FormData) => {
+export const login = async (prevState: any, formData: FormData) => {
   // 서버액션함수를 useFormState의 인자로 사용하면, 서버액션함수의 인자는 (이전상태,제출데이터) 로 변경됨
-  // console.log(data.get('email'), data.get('password'));
-  console.log('prevState::', prevState);
-
-  await new Promise((resolve) => setTimeout(resolve, 5000));
-  redirect('/');
+  const data = {
+    email: formData.get('email'),
+    password: formData.get('password'),
+  };
   return {
     errors: ['wrong password', 'password too short'],
   };
