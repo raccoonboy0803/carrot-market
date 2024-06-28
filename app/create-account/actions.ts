@@ -2,7 +2,11 @@
 
 import { z } from 'zod';
 
-import { PASSWORD_REGEX, SPECAIL_REGEX } from '@/lib/constants';
+import {
+  PASSWORD_REGEX,
+  PASSWORD_REGEX_ERROR,
+  SPECAIL_REGEX,
+} from '@/lib/constants';
 
 const formSchema = z
   .object({
@@ -18,13 +22,7 @@ const formSchema = z
       .regex(SPECAIL_REGEX, 'No special characters allowed.'),
     // regex() : 첫번째인자로 오는 정규표현식을 통과하지못하면, 두번째인자인 에러메시지를 출력
     email: z.string().email().toLowerCase(),
-    password: z
-      .string()
-      .min(4)
-      .regex(
-        PASSWORD_REGEX,
-        'A password must have lowercase, UPPERCASE, a number and special Characters'
-      ),
+    password: z.string().min(4).regex(PASSWORD_REGEX, PASSWORD_REGEX_ERROR),
     confirmPassword: z.string().min(4),
   })
   .refine((data) => data.password === data.confirmPassword, {

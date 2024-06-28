@@ -18,13 +18,20 @@ export default function LogIn() {
         <h2 className="text-xl">Log in with email and password</h2>
       </div>
       <form className="flex flex-col gap-3" action={formAction}>
-        <Input name="email" type="email" placeholder="Email" required />
+        <Input
+          name="email"
+          type="email"
+          placeholder="Email"
+          required
+          errors={state?.fieldErrors.email}
+        />
         <Input
           name="password"
           type="password"
           placeholder="Password"
           required
           minLength={PASSWORD_MIN_LENGTH}
+          errors={state?.fieldErrors.password}
         />
         <Button text="Login" />
       </form>
