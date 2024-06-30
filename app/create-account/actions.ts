@@ -1,5 +1,6 @@
 'use server';
 
+import bcrypt from 'bcrypt';
 import { z } from 'zod';
 
 import {
@@ -8,6 +9,8 @@ import {
   SPECAIL_REGEX,
 } from '@/lib/constants';
 import db from '@/lib/db';
+import { redirect } from 'next/navigation';
+import getSession from '@/lib/session';
 
 const checkUniqueUsername = async (username: string) => {
   const user = await db.user.findUnique({
@@ -84,11 +87,33 @@ export async function createAccount(prevState: any, formData: FormData) {
     return result.error.flatten();
   } else {
     // hash password
+    const hashedPassword = await bcrypt.hash(result.data.password, 12);
+    //.hash()의 두번째 인자: 해싱 알고리즘을 실행할 횟수 지정
+    //.hash()는 단방향 변화
+
     // save the user to db
+    const user = await db.user.create({
+      data: {
+        username: result.data.username,
+        email: result.data.email,
+        password: hashedPassword,
+      },
+      select: {
+        id: true,
+      },
+    });
+
     // log the user in
-    // redirect "/home"
+    const session = await getSession();
+
+    session.id = user.id;
+    await session.save();
+
+    redirect('/profile');
   }
 }
+
+// 브라우저의 기본 동작으로 쿠키는 매 요청마다 서버에 같이 보내짐
 
 // .parse() : 유효성검사 실패 시 throw error -> try catch와 함께 사용
 // .safeParse() : throw error ❌, 결과(객체)를 반환 -> 반환값을 변수에 저장하여 사용
