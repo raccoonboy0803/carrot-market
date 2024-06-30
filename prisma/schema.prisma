@@ -1,0 +1,35 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  // User테이블의 형상을 prisma에게 설명
+  // 변경사항을 DB에 알리기위해 npx prisma migrate dev 명령어를 통해 반영시킴
+  id         Int        @id @default(autoincrement())
+  username   String     @unique
+  email      String?    @unique
+  password   String?
+  phone      String?    @unique
+  github_id  String?    @unique
+  avatar     String?
+  created_at DateTime   @default(now())
+  updated_at DateTime   @updatedAt
+  SMSToken   SMSToken[]
+}
+
+model SMSToken {
+  id         Int      @id @default(autoincrement())
+  token      String   @unique
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // @relation : SMSToken 테이블과 User테이블을 연결
+  // Cascade: user가 onDelete되었을때  relation된 SMSToken의 데이터도 같이 삭제됨
+  // Delete the child records when the parent record is deleted.
+  userId     Int
+}
