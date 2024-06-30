@@ -7,6 +7,7 @@ import {
   PASSWORD_REGEX,
   PASSWORD_REGEX_ERROR,
 } from '@/lib/constants';
+import db from '@/lib/db';
 
 const formSchema = z.object({
   email: z.string().email().toLowerCase(),
@@ -30,7 +31,7 @@ export const login = async (prevState: any, formData: FormData) => {
   if (!result.success) {
     return result.error.flatten();
   } else {
-    console.log('result::', result.data);
+    console.log(result);
   }
 };
 // 유저가 입력한 값은 서버액션함수의 FormData로만 가져올수있다.
