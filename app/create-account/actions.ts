@@ -119,8 +119,6 @@ export async function createAccount(prevState: any, formData: FormData) {
   //해당 스키마도 비동기로 실행되므로 await키워드도 추가
 
   if (!result.success) {
-    console.log(result.error.flatten());
-
     return result.error.flatten();
   } else {
     // hash password

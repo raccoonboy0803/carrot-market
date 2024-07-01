@@ -66,7 +66,7 @@ export const login = async (prevState: any, formData: FormData) => {
     if (ok) {
       const session = await getSession();
       session.id = user!.id;
-
+      await session.save(); // session의 내용이 변경되면, cookie에 session.save()를 통해 변경사항 저장
       redirect('/profile');
     } else {
       return {
