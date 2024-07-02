@@ -1,27 +1,28 @@
 import db from '@/lib/db';
-import getSession from '@/lib/session';
-import { notFound, redirect } from 'next/navigation';
+import { sessionLogin } from '@/lib/login';
+import { redirect } from 'next/navigation';
 import { NextRequest } from 'next/server';
+import { getAccessToken, getUserEmail, getUserProfile } from './actions';
+
+// 깃허브 사이트에 등록된 Authorization callback URL : http://localhost:3000✅/github/complete
+// -> github/complete 라우트 내 route.ts 파일
+
+interface AccessTokenType {
+  error: string;
+  access_token: string;
+}
 
 export async function GET(request: NextRequest) {
   const code = request.nextUrl.searchParams.get('code');
   if (!code) {
-    return notFound();
+    return new Response(null, {
+      status: 400,
+    });
   }
-  const accessTokenParams = new URLSearchParams({
-    client_id: process.env.GITHUB_CLIENT_ID!,
-    client_secret: process.env.GITHUB_CLIENT_SECRET!,
-    code,
-  }).toString();
-  const accessTokenURL = `https://github.com/login/oauth/access_token?${accessTokenParams}`;
-  // const accessTokenResponse = await (await fetch(accessTokenURL)).json()
-  const accessTokenResponse = await fetch(accessTokenURL, {
-    method: 'POST',
-    headers: {
-      Accept: 'application/json',
-    },
-  });
-  const { error, access_token } = await accessTokenResponse.json();
+
+  const { error, access_token }: AccessTokenType = await (
+    await getAccessToken(code)
+  ).json();
 
   if (error) {
     return new Response(null, {
@@ -31,15 +32,12 @@ export async function GET(request: NextRequest) {
     // body: 응답의 본문 설정 (null: 본문이 없음을 의미)
     // init: 응답의 초기화 옵션 설정 (status: 응답의 상태 코드)
   }
-  const userProfileResponse = await fetch('https://api.github.com/user', {
-    headers: {
-      Authorization: `Bearer ${access_token}`,
-    },
-    cache: 'no-cache', // 캐싱 ❌
-  });
-  // 기본적으로 GET request들은 Next.js에의해 캐싱됨
 
-  const { id, avatar_url, login } = await userProfileResponse.json();
+  const emailResponse = await (await getUserEmail(access_token)).json();
+  const { id, avatar_url, login } = await (
+    await getUserProfile(access_token)
+  ).json();
+
   const user = await db.user.findUnique({
     where: {
       github_id: id + '',
@@ -48,28 +46,50 @@ export async function GET(request: NextRequest) {
       id: true,
     },
   });
+
   if (user) {
     // 로그인
-    const session = await getSession();
-    session.id = user.id;
-    await session.save();
+    await sessionLogin(user.id);
     return redirect('/profile');
   }
-  const newUser = await db.user.create({
-    // 회원가입
-    data: {
-      username: login, // email-pwd 가입회원과 유저네임이 중복될수있음(수정사항)
-      github_id: id + '', // toString
-      avatar: avatar_url,
-    },
-    select: {
-      id: true,
+
+  const existUsername = await db.user.findUnique({
+    where: {
+      username: login,
     },
   });
-  const session = await getSession();
-  session.id = newUser.id;
-  await session.save();
-  return redirect('/profile');
+
+  if (existUsername) {
+    const newUser = await db.user.create({
+      // 회원가입
+      data: {
+        username: `${login}-gh`, // email-pwd 가입회원과 유저네임이 중복될수있음(수정사항)
+        github_id: id + '', // toString
+        avatar: avatar_url,
+        email: emailResponse[0].email,
+      },
+      select: {
+        id: true,
+      },
+    });
+    await sessionLogin(newUser.id);
+    return redirect('/profile');
+  } else {
+    const newUser = await db.user.create({
+      // 회원가입
+      data: {
+        username: login, // email-pwd 가입회원과 유저네임이 중복될수있음(수정사항)
+        github_id: id + '', // toString
+        avatar: avatar_url,
+        email: emailResponse[0].email,
+      },
+      select: {
+        id: true,
+      },
+    });
+    await sessionLogin(newUser.id);
+    return redirect('/profile');
+  }
 }
 
 // 서버에서의 .json() 메소드

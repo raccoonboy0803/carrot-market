@@ -45,7 +45,7 @@ const formSchema = z
         required_error: 'Username must be required',
       })
       .min(3, 'Way too short!!')
-      .max(10, 'That is too long!')
+      .max(20, 'That is too long!')
       .toLowerCase()
       .trim()
       .regex(SPECAIL_REGEX, 'No special characters allowed.'),
